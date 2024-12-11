@@ -281,6 +281,7 @@ vlan internal order ascending range 1006 1199
 | ------- | ---- | ------------ |
 | 10 | Ten | - |
 | 20 | Twenty | - |
+| 25 | Twenty-five | - |
 | 3009 | MLAG_iBGP_OVERLAY | LEAF_PEER_L3 |
 | 4093 | LEAF_PEER_L3 | LEAF_PEER_L3 |
 | 4094 | MLAG_PEER | MLAG |
@@ -294,6 +295,9 @@ vlan 10
 !
 vlan 20
    name Twenty
+!
+vlan 25
+   name Twenty-five
 !
 vlan 3009
    name MLAG_iBGP_OVERLAY
@@ -431,6 +435,7 @@ interface Loopback1
 | --------- | ----------- | --- | ---- | -------- |
 | Vlan10 | Ten | OVERLAY | - | False |
 | Vlan20 | Twenty | OVERLAY | - | False |
+| Vlan25 | Twenty-five | OVERLAY | - | False |
 | Vlan3009 | MLAG_PEER_L3_iBGP: vrf OVERLAY | OVERLAY | 1500 | False |
 | Vlan4093 | MLAG_PEER_L3_PEERING | default | 1500 | False |
 | Vlan4094 | MLAG_PEER | default | 1500 | False |
@@ -441,6 +446,7 @@ interface Loopback1
 | --------- | --- | ---------- | ------------------ | ------------------------- | ---- | ------ | ------- |
 | Vlan10 |  OVERLAY  |  -  |  10.10.10.1/24  |  -  |  -  |  -  |  -  |
 | Vlan20 |  OVERLAY  |  -  |  10.20.20.1/24  |  -  |  -  |  -  |  -  |
+| Vlan25 |  OVERLAY  |  -  |  -  |  -  |  -  |  -  |  -  |
 | Vlan3009 |  OVERLAY  |  10.252.1.9/31  |  -  |  -  |  -  |  -  |  -  |
 | Vlan4093 |  default  |  10.252.1.9/31  |  -  |  -  |  -  |  -  |  -  |
 | Vlan4094 |  default  |  10.251.1.9/31  |  -  |  -  |  -  |  -  |  -  |
@@ -460,6 +466,11 @@ interface Vlan20
    no shutdown
    vrf OVERLAY
    ip address virtual 10.20.20.1/24
+!
+interface Vlan25
+   description Twenty-five
+   no shutdown
+   vrf OVERLAY
 !
 interface Vlan3009
    description MLAG_PEER_L3_iBGP: vrf OVERLAY
@@ -498,6 +509,7 @@ interface Vlan4094
 | ---- | --- | ---------- | --------------- |
 | 10 | 10010 | - | - |
 | 20 | 10020 | - | - |
+| 25 | 10025 | - | - |
 
 ##### VRF to VNI and Multicast Group Mappings
 
@@ -516,6 +528,7 @@ interface Vxlan1
    vxlan udp-port 4789
    vxlan vlan 10 vni 10010
    vxlan vlan 20 vni 10020
+   vxlan vlan 25 vni 10025
    vxlan vrf OVERLAY vni 10
 ```
 
@@ -678,6 +691,7 @@ ASN Notation: asplain
 | ---- | ------------------- | ----------------- | ------------------- | ------------------- | ------------ |
 | 10 | 10.250.1.8:10010 | 10010:10010<br>remote 10010:10010 | - | - | learned |
 | 20 | 10.250.1.8:10020 | 10020:10020<br>remote 10020:10020 | - | - | learned |
+| 25 | 10.250.1.8:10025 | 10025:10025<br>remote 10025:10025 | - | - | learned |
 
 #### Router BGP VRFs
 
@@ -752,6 +766,13 @@ router bgp 65103
       rd evpn domain remote 10.250.1.8:10020
       route-target both 10020:10020
       route-target import export evpn domain remote 10020:10020
+      redistribute learned
+   !
+   vlan 25
+      rd 10.250.1.8:10025
+      rd evpn domain remote 10.250.1.8:10025
+      route-target both 10025:10025
+      route-target import export evpn domain remote 10025:10025
       redistribute learned
    !
    address-family evpn
